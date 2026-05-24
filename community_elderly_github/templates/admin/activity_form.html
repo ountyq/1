@@ -1,0 +1,86 @@
+{% extends 'admin/base.html' %}
+{% block title %}{{ action }}活动{% endblock %}
+{% block page_title %}{{ action }}活动{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-9">
+<div class="card">
+  <div class="card-header px-4 py-3">
+    <i class="bi bi-calendar2-plus text-primary"></i> {{ action }}活动
+  </div>
+  <div class="card-body p-4">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label fw-bold">活动名称 <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control" required value="{{ activity.title|default:'' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">活动类型</label>
+          <select name="activity_type" class="form-select">
+            {% for v,l in type_choices %}
+            <option value="{{ v }}" {% if activity.activity_type == v %}selected{% endif %}>{{ l }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">最大报名人数</label>
+          <input type="number" name="max_participants" class="form-control" min="1" value="{{ activity.max_participants|default:50 }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">活动状态</label>
+          <select name="status" class="form-select">
+            {% for v,l in status_choices %}
+            <option value="{{ v }}" {% if activity.status == v %}selected{% endif %}>{{ l }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-bold">活动地点 <span class="text-danger">*</span></label>
+          <input type="text" name="location" class="form-control" required value="{{ activity.location|default:'' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">开始时间 <span class="text-danger">*</span></label>
+          <input type="datetime-local" name="start_time" class="form-control" required
+                 value="{{ activity.start_time|date:'Y-m-d\TH:i'|default:'' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">结束时间 <span class="text-danger">*</span></label>
+          <input type="datetime-local" name="end_time" class="form-control" required
+                 value="{{ activity.end_time|date:'Y-m-d\TH:i'|default:'' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">报名截止时间 <span class="text-danger">*</span></label>
+          <input type="datetime-local" name="register_deadline" class="form-control" required
+                 value="{{ activity.register_deadline|date:'Y-m-d\TH:i'|default:'' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-bold">面向人群</label>
+          <input type="text" name="target_group" class="form-control" placeholder="如：60-80岁老年人，有太极拳基础优先" value="{{ activity.target_group|default:'' }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-bold">活动介绍</label>
+          <textarea name="description" class="form-control" rows="5" placeholder="请详细描述活动内容、注意事项等...">{{ activity.description|default:'' }}</textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-bold">活动海报</label>
+          {% if activity.poster %}
+          <div class="mb-2"><img src="{{ activity.poster.url }}" style="height:120px;border-radius:8px;"></div>
+          {% endif %}
+          <input type="file" name="poster" class="form-control" accept="image/*">
+        </div>
+        <div class="col-12 d-flex gap-3 pt-2">
+          <button type="submit" class="btn btn-primary px-5">
+            <i class="bi bi-check2"></i> 保存{{ action }}
+          </button>
+          <a href="/admin/activities/" class="btn btn-outline-secondary px-4">取消</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+</div>
+{% endblock %}

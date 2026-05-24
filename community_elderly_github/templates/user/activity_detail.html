@@ -1,0 +1,236 @@
+{% extends 'user/base.html' %}
+{% block title %}{{ activity.title }}{% endblock %}
+
+{% block content %}
+<!-- 面包屑导航 -->
+<nav style="margin-bottom: 24px;">
+  <ol style="display: flex; align-items: center; gap: 8px; list-style: none; padding: 0; margin: 0; font-size: 15px;">
+    <li><a href="/user/activities/" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">活动浏览</a></li>
+    <li style="color: var(--text-secondary);">/</li>
+    <li style="color: var(--text-secondary);">{{ activity.title|truncatechars:15 }}</li>
+  </ol>
+</nav>
+
+<div class="row g-4">
+  <!-- 活动详情 -->
+  <div class="col-lg-8">
+    <div class="content-card">
+      {% if activity.poster %}
+      <img src="{{ activity.poster.url }}" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 20px 20px 0 0;">
+      {% else %}
+      <div style="width: 100%; height: 280px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); display: flex; align-items: center; justify-content: center; border-radius: 20px 20px 0 0;">
+        <i data-lucide="calendar" style="width: 80px; height: 80px; color: rgba(255,255,255,0.5);"></i>
+      </div>
+      {% endif %}
+      <div class="card-body">
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <span class="type-badge">{{ activity.get_activity_type_display }}</span>
+          {% if is_activity_finished %}<span class="status-badge" style="background: #e5e7eb; color: #6b7280;">已结束</span>
+          {% elif is_activity_ongoing %}<span class="status-badge info">活动进行中</span>
+          {% elif is_registration_closed and activity.status == 'open' %}<span class="status-badge" style="background: #fef3c7; color: #d97706;">报名已截止</span>
+          {% elif activity.status == 'open' %}<span class="status-badge success">报名进行中</span>
+          {% elif activity.status == 'ongoing' %}<span class="status-badge info">活动进行中</span>
+          {% elif activity.status == 'finished' %}<span class="status-badge" style="background: #e5e7eb; color: #6b7280;">已结束</span>
+          {% else %}<span class="status-badge warning">{{ activity.get_status_display }}</span>{% endif %}
+        </div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 24px; line-height: 1.4;">{{ activity.title }}</h1>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border-radius: 12px; padding: 16px;">
+              <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">活动时间</div>
+              <div style="font-size: 16px; font-weight: 700; color: #dc2626;">
+                <i data-lucide="calendar" style="width: 16px; height: 16px; vertical-align: middle;"></i>
+                {{ activity.start_time|date:"Y年m月d日 H:i" }}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 12px; padding: 16px;">
+              <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">活动地点</div>
+              <div style="font-size: 16px; font-weight: 700; color: #16a34a;">
+                <i data-lucide="map-pin" style="width: 16px; height: 16px; vertical-align: middle;"></i>
+                {{ activity.location }}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 12px; padding: 16px;">
+              <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">报名截止</div>
+              <div style="font-size: 16px; font-weight: 700; color: #2563eb;">
+                <i data-lucide="clock" style="width: 16px; height: 16px; vertical-align: middle;"></i>
+                {{ activity.register_deadline|date:"Y年m月d日 H:i" }}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border-radius: 12px; padding: 16px;">
+              <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">报名名额</div>
+              <div style="font-size: 16px; font-weight: 700; color: #d97706;">
+                <i data-lucide="users" style="width: 16px; height: 16px; vertical-align: middle;"></i>
+                {{ activity.current_participants }} / {{ activity.max_participants }} 人
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if activity.target_group %}
+        <div style="background: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 24px; border-left: 4px solid var(--primary-color);">
+          <div style="color: var(--text-secondary); font-size: 13px; margin-bottom: 4px;">面向人群</div>
+          <div style="font-size: 15px; color: var(--text-primary);">{{ activity.target_group }}</div>
+        </div>
+        {% endif %}
+
+        {% if activity.description %}
+        <div>
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">活动介绍</h3>
+          <div style="font-size: 16px; line-height: 1.8; color: var(--text-primary); white-space: pre-wrap;">{{ activity.description|safe }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 报名操作 -->
+  <div class="col-lg-4">
+    <div class="content-card" style="position: sticky; top: 90px;">
+      <div class="card-header">
+        <h2><i data-lucide="clipboard-check"></i> 报名/签到</h2>
+      </div>
+      <div class="card-body">
+        {% if is_registered %}
+          <!-- 已报名状态 -->
+          <div style="text-align: center; padding: 20px 0;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981, #34d399); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i data-lucide="check" style="width: 40px; height: 40px; color: white;"></i>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; color: #10b981;">已成功报名</div>
+            {% if my_reg.status == 'signed_in' %}
+            <span class="status-badge success" style="margin-top: 8px; display: inline-block;">已签到</span>
+            {% endif %}
+          </div>
+
+          {% if my_reg.qr_code and not is_activity_finished %}
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">活动当天出示此二维码签到</div>
+            <img src="{{ my_reg.qr_code.url }}" style="width: 180px; height: 180px; border: 3px solid var(--primary-color); border-radius: 16px; padding: 8px;">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">签到码仅供本人使用</div>
+          </div>
+          {% elif is_activity_finished %}
+          <div style="text-align: center; margin-bottom: 20px; padding: 16px; background: #f3f4f6; border-radius: 12px;">
+            <div style="font-size: 14px; color: #6b7280;">该活动已结束</div>
+          </div>
+          {% endif %}
+
+          {% if my_reg.status != 'signed_in' and activity.status == 'open' and not is_registration_closed %}
+          <button class="btn-outline-custom" id="cancelBtn" onclick="cancelReg()" style="width: 100%; color: #ef4444; border-color: #ef4444;">
+            <i data-lucide="x-circle"></i> 取消报名
+          </button>
+          {% endif %}
+
+        {% elif activity.status == 'open' and not activity.is_full %}
+          <!-- 可报名状态 -->
+          <div style="text-align: center; padding: 20px 0;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i data-lucide="target" style="width: 40px; height: 40px; color: white;"></i>
+            </div>
+            <div style="font-size: 15px; color: var(--text-secondary); margin-bottom: 8px;">剩余名额</div>
+            <div style="font-size: 32px; font-weight: 800; color: var(--primary-color); margin-bottom: 16px;">{{ activity.remaining_spots }} <span style="font-size: 16px; font-weight: 500;">名</span></div>
+          </div>
+          <div style="background: #fefce8; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 14px; color: #854d0e;">
+            <i data-lucide="info" style="width: 16px; height: 16px; vertical-align: middle;"></i>
+            报名成功后将生成专属签到二维码，活动当天出示给管理员扫码签到即可
+          </div>
+          <button class="btn-primary-custom" id="registerBtn" onclick="registerAct()" style="width: 100%;">
+            <i data-lucide="check-circle"></i> 立即报名
+          </button>
+
+        {% elif is_registration_closed and activity.status == 'open' %}
+          <div style="text-align: center; padding: 40px 0;">
+            <div style="width: 80px; height: 80px; background: #fef3c4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i data-lucide="clock" style="width: 40px; height: 40px; color: #d97706;"></i>
+            </div>
+            <div style="font-size: 18px; font-weight: 700; color: #d97706;">报名已截止</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-top: 8px;">报名时间已过，无法再报名</div>
+          </div>
+
+        {% elif activity.is_full %}
+          <div style="text-align: center; padding: 40px 0;">
+            <div style="width: 80px; height: 80px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i data-lucide="users" style="width: 40px; height: 40px; color: #9ca3af;"></i>
+            </div>
+            <div style="font-size: 18px; font-weight: 700; color: #ef4444;">报名名额已满</div>
+          </div>
+
+        {% else %}
+          <div style="text-align: center; padding: 40px 0;">
+            <div style="width: 80px; height: 80px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+              <i data-lucide="lock" style="width: 40px; height: 40px; color: #9ca3af;"></i>
+            </div>
+            <div style="font-size: 18px; font-weight: 600; color: #6b7280;">该活动暂未开放报名</div>
+          </div>
+        {% endif %}
+
+        <a href="/user/activities/" class="btn-outline-custom" style="width: 100%; margin-top: 16px; display: inline-block; text-align: center;">
+          <i data-lucide="arrow-left"></i> 返回活动列表
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const actId = {{ activity.id }};
+
+function registerAct() {
+  if (!confirm('确认报名「{{ activity.title }}」？')) return;
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true;
+  btn.textContent = '报名中...';
+  fetch(`/user/activities/${actId}/register/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken'),
+      'Content-Type': 'application/json'
+    }
+  }).then(r => r.json()).then(d => {
+    if (d.code === 200) {
+      alert('🎉 ' + d.msg);
+      location.reload();
+    } else {
+      alert('❌ ' + d.msg);
+      btn.disabled = false;
+      btn.textContent = '立即报名';
+    }
+  });
+}
+
+function cancelReg() {
+  if (!confirm('确认取消报名？')) return;
+  fetch(`/user/activities/${actId}/cancel/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+  }).then(r => r.json()).then(d => {
+    alert(d.msg);
+    if (d.code === 200) location.reload();
+  });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+{% endblock %}
