@@ -1,0 +1,96 @@
+{% extends 'user/base.html' %}
+{% block title %}新闻资讯 - 社区老年活动{% endblock %}
+
+{% block content %}
+<!-- 页面标题 -->
+<div class="page-header">
+    <h1><i data-lucide="newspaper"></i> 新闻资讯</h1>
+</div>
+
+<!-- 分类筛选 -->
+<div class="content-card mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2" style="overflow-x: auto;">
+            <a href="/user/news/" class="btn {% if not category %}btn-primary-custom{% else %}btn-outline-custom{% endif %}" style="padding: 10px 20px; font-size: 14px;">全部</a>
+            <a href="/user/news/?category=policy" class="btn {% if category == 'policy' %}btn-primary-custom{% else %}btn-outline-custom{% endif %}" style="padding: 10px 20px; font-size: 14px;">政策资讯</a>
+            <a href="/user/news/?category=health" class="btn {% if category == 'health' %}btn-primary-custom{% else %}btn-outline-custom{% endif %}" style="padding: 10px 20px; font-size: 14px;">健康养生</a>
+            <a href="/user/news/?category=activity" class="btn {% if category == 'activity' %}btn-primary-custom{% else %}btn-outline-custom{% endif %}" style="padding: 10px 20px; font-size: 14px;">活动动态</a>
+            <a href="/user/news/?category=notice" class="btn {% if category == 'notice' %}btn-primary-custom{% else %}btn-outline-custom{% endif %}" style="padding: 10px 20px; font-size: 14px;">社区通知</a>
+        </div>
+    </div>
+</div>
+
+<!-- 新闻列表 -->
+{% if page.object_list %}
+<div class="activity-grid">
+    {% for n in page %}
+    <a href="/user/news/{{ n.id }}/" class="activity-card-large">
+        <div class="card-image" style="height: 180px;">
+            {% if n.cover %}
+            <img src="{{ n.cover.url }}" alt="{{ n.title }}">
+            {% else %}
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6366f1, #818cf8);">
+                <i data-lucide="newspaper" style="width: 60px; height: 60px; color: rgba(255,255,255,0.5);"></i>
+            </div>
+            {% endif %}
+            <span class="type-badge">{{ n.get_category_display }}</span>
+            {% if n.is_top %}
+            <span class="spots-badge" style="background: rgba(239, 68, 68, 0.95);">置顶</span>
+            {% endif %}
+        </div>
+        <div class="card-content">
+            <h3 style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ n.title }}</h3>
+            <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 8px;">
+                {{ n.content|truncatechars:80 }}
+            </p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; color: var(--text-secondary); font-size: 13px;">
+                <span style="display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                    {{ n.publish_time|date:"m月d日" }}
+                </span>
+                <span style="display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                    {{ n.views }} 次浏览
+                </span>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+{% if page.has_other_pages %}
+<nav class="mt-5">
+    <ul class="pagination justify-content-center" style="gap: 8px;">
+        {% if page.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page.previous_page_number }}&category={{ category }}" style="padding: 12px 20px; font-size: 15px; border-radius: 10px; border: 2px solid var(--border-color); color: var(--text-primary); font-weight: 600;">
+                <i data-lucide="chevron-left" style="width: 18px; height: 18px; vertical-align: middle;"></i> 上一页
+            </a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link" style="padding: 12px 24px; font-size: 15px; border-radius: 10px; background: var(--primary-color); color: white; border: none; font-weight: 600;">
+                {{ page.number }} / {{ page.paginator.num_pages }}
+            </span>
+        </li>
+        {% if page.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page.next_page_number }}&category={{ category }}" style="padding: 12px 20px; font-size: 15px; border-radius: 10px; border: 2px solid var(--border-color); color: var(--text-primary); font-weight: 600;">
+                下一页 <i data-lucide="chevron-right" style="width: 18px; height: 18px; vertical-align: middle;"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div style="text-align: center; padding: 80px 20px; background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+    <div style="width: 120px; height: 120px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+        <i data-lucide="newspaper" style="width: 60px; height: 60px; color: #94a3b8;"></i>
+    </div>
+    <h3 style="font-size: 22px; color: var(--text-primary); margin-bottom: 8px;">暂无新闻资讯</h3>
+    <p style="color: var(--text-secondary);">请稍后再来看看</p>
+</div>
+{% endif %}
+{% endblock %}

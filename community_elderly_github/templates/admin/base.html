@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}社区老年活动管理系统 - 管理员{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --primary-color: #7C3AED;
+            --primary-light: #A78BFA;
+            --primary-dark: #4C1D95;
+            --sidebar-bg: #1E293B;
+            --sidebar-hover: rgba(124, 58, 237, 0.2);
+            --sidebar-active: rgba(124, 58, 237, 0.3);
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+        }
+        
+        body {
+            font-family: 'Inter', '微软雅黑', sans-serif;
+            background: #F8FAFC;
+            min-height: 100vh;
+        }
+        
+        /* ===== 侧边栏优化 ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+        
+        .sidebar-brand {
+            padding: 24px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-brand .logo-wrapper {
+            width: 70px;
+            height: 70px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .sidebar-brand .logo-wrapper i {
+            font-size: 32px;
+            color: white;
+        }
+        
+        .sidebar-brand h5 {
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 8px 0 4px 0;
+        }
+        
+        .sidebar-brand p {
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+            margin: 0;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 0;
+            overflow-y: auto;
+        }
+        
+        .nav-section {
+            padding: 12px 20px 8px;
+            font-size: 11px;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        
+        .nav-item {
+            margin: 2px 12px;
+        }
+        
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item a:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(5px);
+            border-left-color: var(--primary-light);
+        }
+        
+        .nav-item a.active {
+            background: var(--sidebar-active);
+            color: white;
+            border-left-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .nav-item a i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-footer a {
+            color: #94A3B8;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-footer a:hover {
+            color: white;
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .sidebar-footer a i {
+            font-size: 18px;
+        }
+        
+        /* ===== 主内容区 ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* ===== 顶部导航栏 ===== */
+        .topbar {
+            background: white;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .topbar-title {
+            font-weight: 700;
+            color: #1F2937;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .topbar-title i {
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+        
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #4B5563;
+            font-size: 15px;
+        }
+        
+        .topbar-user .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .topbar-user .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .topbar-user .user-name {
+            font-weight: 600;
+            color: #1F2937;
+        }
+        
+        .topbar-user .user-role {
+            font-size: 12px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* ===== 内容区 ===== */
+        .content-area {
+            padding: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ===== 消息容器 ===== */
+        .messages-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .messages-container .alert {
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: none;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .messages-container .alert i {
+            font-size: 20px;
+        }
+        
+        /* ===== 响应式优化 ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .topbar {
+                padding: 0 15px;
+            }
+            
+            .topbar-title {
+                font-size: 18px;
+            }
+            
+            .content-area {
+                padding: 15px;
+            }
+            
+            .messages-container {
+                width: calc(100% - 30px);
+                right: 15px;
+            }
+        }
+        
+        /* ===== 滚动条优化 ===== */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* ===== 页面标题 ===== */
+        .page-header {
+            margin-bottom: 24px;
+        }
+        
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .page-header h1 i {
+            color: var(--primary-color);
+        }
+        
+        /* ===== 内容卡片 ===== */
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .content-card .card-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+        }
+        
+        .content-card .card-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .content-card .card-header h2 i {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .content-card .card-body {
+            padding: 24px;
+        }
+        
+        /* ===== 数据表格 ===== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead {
+            background: #F8FAFC;
+        }
+        
+        .data-table th {
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        
+        .data-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #E5E7EB;
+            color: #4B5563;
+            font-size: 14px;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #F9FAFB;
+        }
+        
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* ===== 按钮样式 ===== */
+        .btn-primary-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+            color: white;
+        }
+        
+        .btn-outline-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-custom:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* ===== 状态徽章 ===== */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge.success {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        
+        .status-badge.info {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+        
+        .status-badge.warning {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        
+        .status-badge.danger {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        
+        /* ===== 类型徽章 ===== */
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+            color: #4F46E5;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* ===== 进度条 ===== */
+        .progress {
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        /* ===== 表单样式 ===== */
+        .form-control, .form-select {
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-wrapper">
+                <i data-lucide="home"></i>
+            </div>
+            <h5>社区老年活动管理系统</h5>
+            <p>管理员控制台</p>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">总览</div>
+            <div class="nav-item">
+                <a href="/admin_dashboard/" class="{% if request.path == '/admin_dashboard/' %}active{% endif %}">
+                    <i data-lucide="layout-dashboard"></i> 首页概览
+                </a>
+            </div>
+            
+            <div class="nav-section">用户管理</div>
+            <div class="nav-item">
+                <a href="/admin/users/" class="{% if '/admin/users' in request.path %}active{% endif %}">
+                    <i data-lucide="users"></i> 老年用户
+                </a>
+            </div>
+            
+            <div class="nav-section">活动管理</div>
+            <div class="nav-item">
+                <a href="/admin/activities/" class="{% if '/admin/activities' in request.path and '/create' not in request.path %}active{% endif %}">
+                    <i data-lucide="calendar"></i> 活动列表
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/admin/activities/create/" class="{% if '/admin/activities/create' in request.path %}active{% endif %}">
+                    <i data-lucide="plus-circle"></i> 发布活动
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/admin/registrations/" class="{% if '/admin/registrations' in request.path %}active{% endif %}">
+                    <i data-lucide="clipboard-check"></i> 报名管理
+                </a>
+            </div>
+            
+            <div class="nav-section">内容管理</div>
+            <div class="nav-item">
+                <a href="/admin/announcements/" class="{% if '/admin/announcements' in request.path %}active{% endif %}">
+                    <i data-lucide="megaphone"></i> 公告管理
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/admin/news/" class="{% if '/admin/news' in request.path %}active{% endif %}">
+                    <i data-lucide="newspaper"></i> 新闻管理
+                </a>
+            </div>
+            
+            <div class="nav-section">统计分析</div>
+            <div class="nav-item">
+                <a href="/admin/statistics/" class="{% if '/admin/statistics' in request.path %}active{% endif %}">
+                    <i data-lucide="bar-chart-3"></i> 数据统计
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <a href="/logout/">
+                <i data-lucide="log-out"></i> 退出登录
+            </a>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 顶部导航栏 -->
+        <div class="topbar">
+            <span class="topbar-title">
+                <i data-lucide="menu" style="cursor: pointer; display: none;" id="sidebarToggle"></i>
+                {% block page_title %}管理后台{% endblock %}
+            </span>
+            <div class="topbar-user">
+                <div class="avatar">
+                    <i data-lucide="user"></i>
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ request.user.first_name|default:request.user.username }}</span>
+                    <span class="user-role">管理员</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 消息提示 -->
+        {% if messages %}
+        <div class="messages-container">
+            {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {% if msg.tags == 'success' %}
+                    <i data-lucide="check-circle"></i>
+                {% elif msg.tags == 'error' or msg.tags == 'danger' %}
+                    <i data-lucide="alert-circle"></i>
+                {% elif msg.tags == 'warning' %}
+                    <i data-lucide="alert-triangle"></i>
+                {% else %}
+                    <i data-lucide="info"></i>
+                {% endif %}
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- 内容区 -->
+        <div class="content-area">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 初始化Lucide图标
+        lucide.createIcons();
+        
+        // 侧边栏切换（移动端）
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (window.innerWidth <= 768) {
+            sidebarToggle.style.display = 'block';
+        }
+        
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+        
+        // 自动隐藏消息
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                setTimeout(() => bsAlert.close(), 5000);
+            });
+        }, 1000);
+        
+        // 响应式处理
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                sidebarToggle.style.display = 'block';
+            } else {
+                sidebarToggle.style.display = 'none';
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
